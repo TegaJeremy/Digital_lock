@@ -12,30 +12,29 @@ const Login = ({ onLoginSuccess }) => {
   const [usingFallback, setUsingFallback] = useState(false);
 
   const handleLogin = async (e) => {
-  e.preventDefault();
-  if (!email || !password) {
-    setError('Please enter your email and password');
-    return;
-  }
-  setLoading(true);
-  setError('');
-  try {
-    const data = await signIn(email, password);
-    cacheCredentials(email, password);
-    try {
-      await connectGoogleDrive();
-    } catch (driveErr) {
-      console.warn('Drive connect skipped:', driveErr);
+    e.preventDefault();
+    if (!email || !password) {
+      setError('Please enter your email and password');
+      return;
     }
-    onLoginSuccess(data.session, password);
-  } catch (err) {
-    console.warn('Supabase auth failed, trying fallback...', err);
-    await tryFallbackLogin(email, password);
-  } finally {
-    setLoading(false);
-  }
-};
-
+    setLoading(true);
+    setError('');
+    try {
+      const data = await signIn(email, password);
+      cacheCredentials(email, password);
+      try {
+        await connectGoogleDrive();
+      } catch (driveErr) {
+        console.warn('Drive connect skipped:', driveErr);
+      }
+      onLoginSuccess(data.session, password);
+    } catch (err) {
+      console.warn('Supabase auth failed, trying fallback...', err);
+      await tryFallbackLogin(email, password);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const tryFallbackLogin = async (email, password) => {
     try {
@@ -87,7 +86,7 @@ const Login = ({ onLoginSuccess }) => {
           </div>
         )}
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin} autoComplete="off">
           <div className="form-group">
             <label>Email</label>
             <input
@@ -95,7 +94,7 @@ const Login = ({ onLoginSuccess }) => {
               placeholder="your@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
+              autoComplete="new-password"
             />
           </div>
           <div className="form-group">
@@ -106,7 +105,7 @@ const Login = ({ onLoginSuccess }) => {
                 placeholder="Your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
+                autoComplete="new-password"
               />
               <button
                 type="button"
