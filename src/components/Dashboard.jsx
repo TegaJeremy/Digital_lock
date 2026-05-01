@@ -55,6 +55,19 @@ const Dashboard = ({ session, password, darkMode, toggleDarkMode, onLogout, driv
     setModalOpen(true);
   };
 
+  const handleDriveConnected = async () => {
+  if (entries.length === 0) return;
+  try {
+    const { encryptEntry } = await import('../lib/crypto');
+    const { writeBackup } = await import('../lib/googleDrive');
+    const allEncrypted = entries.map((e) => encryptEntry(e, password));
+    await writeBackup(allEncrypted);
+    showToast('All entries synced to backup');
+  } catch (e) {
+    console.error('Sync on connect failed:', e);
+  }
+};
+
   const handleDelete = async (id) => {
     await removeEntry(id);
     setConfirmDelete(null);
@@ -80,6 +93,7 @@ const Dashboard = ({ session, password, darkMode, toggleDarkMode, onLogout, driv
         toggleDarkMode={toggleDarkMode}
         onLogout={onLogout}
         driveReady={driveReady}
+         onDriveConnected={handleDriveConnected}
       />
 
       <div className="dashboard">

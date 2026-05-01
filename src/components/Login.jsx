@@ -12,29 +12,27 @@ const Login = ({ onLoginSuccess }) => {
   const [usingFallback, setUsingFallback] = useState(false);
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    if (!email || !password) {
-      setError('Please enter your email and password');
-      return;
-    }
-    setLoading(true);
-    setError('');
-    try {
-      const data = await signIn(email, password);
-      cacheCredentials(email, password);
-      try {
-        await connectGoogleDrive();
-      } catch (driveErr) {
-        console.warn('Drive connect skipped:', driveErr);
-      }
-      onLoginSuccess(data.session, password);
-    } catch (err) {
-      console.warn('Supabase auth failed, trying fallback...', err);
-      await tryFallbackLogin(email, password);
-    } finally {
-      setLoading(false);
-    }
-  };
+  e.preventDefault();
+  if (!email || !password) {
+    setError('Please enter your email and password');
+    return;
+  }
+  setLoading(true);
+  setError('');
+  try {
+    const data = await signIn(email, password);
+    cacheCredentials(email, password);
+    onLoginSuccess(data.session, password);
+    connectGoogleDrive().catch(() => {
+      console.warn('Drive connect skipped');
+    });
+  } catch (err) {
+    console.warn('Supabase auth failed, trying fallback...', err);
+    await tryFallbackLogin(email, password);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const tryFallbackLogin = async (email, password) => {
     try {

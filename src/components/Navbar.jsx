@@ -3,7 +3,7 @@ import { signOut } from '../lib/supabase';
 import { connectGoogleDrive, isConnected } from '../lib/googleDrive';
 import { useState, useEffect } from 'react';
 
-const Navbar = ({ darkMode, toggleDarkMode, onLogout, driveReady }) => {
+const Navbar = ({ darkMode, toggleDarkMode, onLogout, driveReady, onDriveConnected }) => {
   const [driveConnected, setDriveConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
 
@@ -15,17 +15,18 @@ const Navbar = ({ darkMode, toggleDarkMode, onLogout, driveReady }) => {
   }, [driveReady]);
 
   const handleDriveConnect = async () => {
-    if (driveConnected) return;
-    setConnecting(true);
-    try {
-      await connectGoogleDrive();
-      setDriveConnected(true);
-    } catch (e) {
-      console.error('Drive connect failed:', e);
-    } finally {
-      setConnecting(false);
-    }
-  };
+  if (driveConnected) return;
+  setConnecting(true);
+  try {
+    await connectGoogleDrive();
+    setDriveConnected(true);
+    if (onDriveConnected) await onDriveConnected();
+  } catch (e) {
+    console.error('Drive connect failed:', e);
+  } finally {
+    setConnecting(false);
+  }
+};
 
   const handleLogout = async () => {
     await signOut();
